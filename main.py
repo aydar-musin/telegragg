@@ -1,10 +1,11 @@
 __author__ = 'aydar'
-
 import re
 import dataStorage
 import UserData
 import config
 import telebot
+import email_checker
+import threading
 
 database = dataStorage.Database()
 bot = telebot.TeleBot(config.token)
@@ -15,15 +16,18 @@ user_states = {}
 
 @bot.message_handler(content_types=['text'])
 def message_handler(message):
-    user_id = message.chat.id
-    state = None
+    try:
+        user_id = message.chat.id
+        state = None
 
-    if user_id in user_states:
-        state = user_states[user_id]
+        if user_id in user_states:
+            state = user_states[user_id]
 
-    result = react(state, user_id, message.text)
-    user_states[user_id] = result[0]
-    bot.send_message(user_id, result[1])
+        result = react(state, user_id, message.text)
+        user_states[user_id] = result[0]
+        bot.send_message(user_id, result[1])
+    except:
+        bot.send_message(user_id, 'Error')
 
 # available states:
 WAIT_EMAIL = 'WAIT_EMAIL'
@@ -65,6 +69,7 @@ def react(state, user_id, message):
                 return None, 'Session was interrupted. Try to start again by typing /add'
 
             temp_email.password = message
+            temp_email.imap_host = 'imap.'+temp_email.email.split('@')[1]
 
             if user:
                 user.emails.append(temp_email)
@@ -77,6 +82,23 @@ def react(state, user_id, message):
             database.update_user(user)
             return None, 'Email successfully added!'
 
+
+def check_event():
+    try:
+
+        users = database.get_all_users()
+
+        for user in users:
+            for email_setting in user.emails:
+                new_emails = email_checker.get_unseen(email_setting)
+                for email in new_emails.values():
+                    bot.send_message(user.id, email)
+    except:
+        print('error in check event')
+
+    threading.Timer(10, check_event).start()
+
+check_event()
 
 if(__name__=='__main__'):
     bot.polling(none_stop=True)
