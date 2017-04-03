@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import imaplib
 from UserData import EmailSettings
 from dataStorage import Database
+from EmailMessage import EmailMessage
 
 
 def from_html(html):
@@ -48,6 +49,12 @@ def get_unseen(email_settings):
             else:
                 message = from_html(mail.get_payload(decode=True))
 
-        result[uid] = message
+        email_msg = EmailMessage()
+        email_msg.id = uid
+        email_msg.email = email_settings.email
+        email_msg.from_email = mail['from']
+        email_msg.message = message
+
+        result[uid] = email_msg
 
     return result

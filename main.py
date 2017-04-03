@@ -1,4 +1,3 @@
-__author__ = 'aydar'
 import re
 import dataStorage
 import UserData
@@ -92,9 +91,9 @@ def check_event():
             for email_setting in user.emails:
                 new_emails = email_checker.get_unseen(email_setting)
                 for email in new_emails.values():
-                    bot.send_message(user.id, email)
-    except:
-        print('error in check event')
+                    bot.send_message(user.id, u'New email on '+email.email.decode('utf-8')+u' from '+email.from_email.decode('utf-8')+u' \r\n\r\n '+email.message.decode('utf-8'))
+    except Exception as e:
+        print('error in check event '+e.message)
 
     threading.Timer(10, check_event).start()
 
