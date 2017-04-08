@@ -3,8 +3,7 @@ __author__ = 'aydar'
 import email
 from bs4 import BeautifulSoup
 import imaplib
-from UserData import EmailSettings
-from dataStorage import Database
+
 from EmailMessage import EmailMessage
 
 
@@ -42,7 +41,8 @@ def get_unseen(email_settings):
                 else:
                     message = from_html(part.get_payload(decode=True))
 
-                break
+                if message and message != '':
+                    break
         else:
             if mail.get_content_type() == 'text/plain':
                 message = mail.get_payload(decode=True)

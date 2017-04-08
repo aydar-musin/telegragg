@@ -1,10 +1,12 @@
 import re
-import dataStorage
+import threading
+
+import telebot
+
+from Database import dataStorage
 import UserData
 import config
-import telebot
 import email_checker
-import threading
 
 database = dataStorage.Database()
 bot = telebot.TeleBot(config.token)
@@ -25,8 +27,8 @@ def message_handler(message):
         result = react(state, user_id, message.text)
         user_states[user_id] = result[0]
         bot.send_message(user_id, result[1])
-    except:
-        bot.send_message(user_id, 'Error')
+    except Exception as e:
+        bot.send_message(user_id, 'Error '+ e.message)
 
 # available states:
 WAIT_EMAIL = 'WAIT_EMAIL'
@@ -49,7 +51,7 @@ def react(state, user_id, message):
         if state == WAIT_EMAIL:
             if not re.match(r'[^@]+@[^@]+\.[^@]+', message):
                 return WAIT_EMAIL, 'Not valid email address. Try again'
-            elif database.get_user(user_id) and message in [obj.email for obj in database.get_user(user_id).emails]:
+            elif database.get_user(user_id) and message in [obj.email for obj in database.get_emails(user_id)]:
                 return WAIT_EMAIL, 'This email is already added. Try again'
             else:
                 email = UserData.EmailSettings()
@@ -58,8 +60,6 @@ def react(state, user_id, message):
 
                 return WAIT_PASSWORD, 'OK, send me the password. It\'s secure :)'
         elif state == WAIT_PASSWORD:
-            user = database.get_user(user_id)
-
             temp_email = None
 
             if user_temp_emails.has_key(user_id):
@@ -70,15 +70,16 @@ def react(state, user_id, message):
             temp_email.password = message
             temp_email.imap_host = 'imap.'+temp_email.email.split('@')[1]
 
+            user = database.get_user(user_id)
+
             if user:
-                user.emails.append(temp_email)
-                database.update_user(user)
+                database.add_email(user.id, temp_email)
             else:
                 user = UserData.User()
                 user.id = user_id
-                user.emails.append(temp_email)
+                database.create_user(user)
+                database.add_email(temp_email)
 
-            database.update_user(user)
             return None, 'Email successfully added!'
 
 

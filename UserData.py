@@ -4,6 +4,8 @@ __author__ = 'aydar'
 class User:
     def __init__(self):
         self.id = None
+        self.name = None
+        self.creation_time = None
         self.emails = []
 
 
