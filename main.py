@@ -92,12 +92,37 @@ def check_event():
             for email_setting in user.emails:
                 new_emails = email_checker.get_unseen(email_setting)
                 for email in new_emails.values():
-                    bot.send_message(user.id, u'New email on '+email.email.decode('utf-8')+u' from '+email.from_email.decode('utf-8')+u' \r\n\r\n '+email.message.decode('utf-8'))
+                    bot.send_message(user.id, u'New email on '+email.email.decode('utf-8')+u'\r\n-------\r\n from '+email.from_email.decode('utf-8')+u'\r\n-------- \r\n\r\n '+ clean_str(get_unicode_str(email.message)))
     except Exception as e:
         print('error in check event '+e.message)
 
     threading.Timer(10, check_event).start()
 
+
+def get_unicode_str(str):
+    try:
+        return str.decode('utf-8')
+    except:
+        return str
+
+
+def clean_str(str):
+    try:
+        result= []
+        lines = str.split('\n')
+        lastLine = 'initial str'
+
+        for line in lines:
+            if not (re.match(r'^\s*$', line) and re.match(r'^\s*$', lastLine)):
+                result.append(line)
+            lastLine = line
+
+        return '\n'.join(result)
+    except Exception as e:
+        print e.message
+        return  str
+
+print 'starting...'
 check_event()
 
 if(__name__=='__main__'):

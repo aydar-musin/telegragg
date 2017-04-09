@@ -36,10 +36,13 @@ def get_unseen(email_settings):
 
         if mail.is_multipart():
             for part in mail.get_payload():
-                if part.get_content_type() == 'text/plain':
-                    message = part.get_payload(decode=True)
-                else:
-                    message = from_html(part.get_payload(decode=True))
+                try:
+                    if part.get_content_type() == 'text/plain':
+                        message = part.get_payload(decode=True)
+                    else:
+                        message = from_html(part.get_payload(decode=True))
+                except:
+                    message = ''
 
                 if message and message != '':
                     break
