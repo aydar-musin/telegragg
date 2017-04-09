@@ -36,15 +36,15 @@ WAIT_PASSWORD = 'WAIT_PASSWORD'
 
 
 def react(state, user_id, message):
-    if message == '/start':
-        return None, 'Welcome. Use /add to add email'
+    if message == '/start' or message == '/help':
+        return None, 'Welcome! Use /add to add email. Also you can use /list to show all your added emails and /help to see this message.'
     elif message == '/add':
         return WAIT_EMAIL, 'OK, send me your email address'
     elif message == '/list':
-        user = database.get_user(user_id)
-        if user:
+        emails = database.get_emails(user_id)
+        if emails:
             result = ''
-            for email in user.emails:
+            for email in emails:
                 result = result + '\n' + email.email
             return None, 'Here is your added emails:\n'+result
     else:
@@ -78,7 +78,7 @@ def react(state, user_id, message):
                 user = UserData.User()
                 user.id = user_id
                 database.create_user(user)
-                database.add_email(temp_email)
+                database.add_email(user.id, temp_email)
 
             return None, 'Email successfully added!'
 

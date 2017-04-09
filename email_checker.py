@@ -27,7 +27,7 @@ def get_unseen(email_settings):
 
     result = {}
 
-    for index, emailid in enumerate(items):
+    for index, emailid in enumerate(items[:10]):
         uid = m.fetch(emailid, "UID")[1][0]
         message = None
         resp, data = m.fetch(emailid, "(RFC822)")
