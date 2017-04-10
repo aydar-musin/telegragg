@@ -66,10 +66,7 @@ def get_email_text(mail):
                     return message
         else:
             if mail.get_content_type() == 'text/plain':
-                res = mail.get_payload(decode=True)
-                if not isinstance(res, str):
-                    res = mail.get_payload()
-                return res
+                return mail.get_payload(decode=True)
             elif mail.get_content_type() == 'text/html':
                 return from_html(mail.get_payload(decode=True))
     except Exception as e:
