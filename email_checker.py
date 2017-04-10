@@ -61,3 +61,15 @@ def get_unseen(email_settings):
         result[uid] = email_msg
 
     return result
+
+
+def check_settings(email_setting):
+    try:
+        m = imaplib.IMAP4_SSL(email_setting.imap_host)
+        m.login(email_setting.email, email_setting.password)
+        m.select("Inbox")
+        status, unreadcount = m.status('INBOX', "(UNSEEN)")
+        return True
+    except Exception as e:
+        print 'email check error: '+ str(e.message)
+        return False

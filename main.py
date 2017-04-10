@@ -70,6 +70,9 @@ def react(state, user_id, message):
             temp_email.password = message
             temp_email.imap_host = 'imap.'+temp_email.email.split('@')[1]
 
+            if not email_checker.check_settings(temp_email):
+                return None, 'I can not connect to your email box.'
+
             user = database.get_user(user_id)
 
             if user:
