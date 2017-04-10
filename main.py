@@ -95,9 +95,9 @@ def check_event():
             for email_setting in user.emails:
                 new_emails = email_checker.get_unseen(email_setting)
                 for email in new_emails.values():
-                    bot.send_message(user.id, u'New email on '+email.email.decode('utf-8')+u'\r\n-------\r\n from '+email.from_email.decode('utf-8')+u'\r\n-------- \r\n\r\n '+ clean_str(get_unicode_str(email.message)))
+                    bot.send_message(user.id, 'New email on '+email.email+'\r\n-------\r\nFrom '+email.from_email+'\r\n-------- \r\n\r\n '+ clean_str(get_unicode_str(email.message)))
     except Exception as e:
-        print('error in check event '+e.message)
+        print('error in check event '+str(e))
 
     threading.Timer(10, check_event).start()
 
@@ -122,10 +122,10 @@ def clean_str(str):
 
         return '\n'.join(result)
     except Exception as e:
-        print e.message
+        print(str(e))
         return  str
 
-print 'starting...'
+print('starting...')
 check_event()
 
 if(__name__=='__main__'):
