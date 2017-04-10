@@ -1,12 +1,11 @@
 import re
 import threading
-
 import telebot
-
 from Database import dataStorage
 import UserData
 import config
 import email_checker
+import logger
 
 database = dataStorage.Database()
 bot = telebot.TeleBot(config.token)
@@ -28,7 +27,8 @@ def message_handler(message):
         user_states[user_id] = result[0]
         bot.send_message(user_id, result[1])
     except Exception as e:
-        bot.send_message(user_id, 'Error '+ e.message)
+        bot.send_message(user_id, 'Error. Try again')
+        logger.error('message_handler: '+str(e))
 
 # available states:
 WAIT_EMAIL = 'WAIT_EMAIL'
@@ -88,25 +88,29 @@ def react(state, user_id, message):
 
 def check_event():
     try:
-
         users = database.get_all_users()
 
         for user in users:
-            for email_setting in user.emails:
-                new_emails = email_checker.get_unseen(email_setting)
-                for email in new_emails.values():
-                    bot.send_message(user.id, 'New email on '+email.email+'\r\n-------\r\nFrom '+email.from_email+'\r\n-------- \r\n\r\n '+ clean_str(get_unicode_str(email.message)))
+            try:
+                for email_setting in user.emails:
+                    new_emails = email_checker.get_unseen(email_setting)
+                    for email in new_emails.values():
+                        bot.send_message(user.id, 'New email on: '+email.email+'\r\n-------\r\nFrom: '+email.from_email+'\r\n-------- \r\n\r\n '+ clean_str(get_unicode_str(email.message))[:3500])
+            except Exception as e:
+                print('check_event with user:' +str(user.id)+': ' + str(e))
     except Exception as e:
         print('error in check event '+str(e))
+        logger.error('check_event: '+str(e))
 
     threading.Timer(10, check_event).start()
 
 
-def get_unicode_str(str):
+def get_unicode_str(input):
     try:
-        return str.decode('utf-8')
-    except:
-        return str
+        return input.decode('utf-8')
+    except Exception as e:
+        logger.error('get_unicode_str: '+str(e))
+        return input
 
 
 def clean_str(str):
