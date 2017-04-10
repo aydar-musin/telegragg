@@ -1,15 +1,14 @@
 __author__ = 'aydar'
 
-import pymysql
-import pymysql.cursors
+import MySQLdb
 import config
 import UserData
-from  .encryption import AESCipher
+from encryption import AESCipher
 
 class Database:
     def __init__(self):
         self.storage = {}
-        self.db = pymysql.connect(host=config.db_host, user=config.db_username, passwd=config.db_password, db="telegraggdb", charset='utf8')
+        self.db = MySQLdb.connect(host=config.db_host, user=config.db_username, passwd=config.db_password, db="telegraggdb", charset='utf8')
         self.db.autocommit(True)
         self.__crypto = AESCipher(config.db_crypto_key)
 

@@ -3,7 +3,7 @@ __author__ = 'aydar'
 import email
 from bs4 import BeautifulSoup
 import imaplib
-from email.header import Header, decode_header, make_header
+
 from EmailMessage import EmailMessage
 
 
@@ -15,26 +15,18 @@ def from_html(html):
     return soup.get_text()
 
 
-def parse_header(header):
-    try:
-        h = make_header(decode_header(header))
-        return str(h)
-    except Exception as e:
-        print('parser_header error: '+ str(e))
-        return ''
-
 def get_unseen(email_settings):
     m = imaplib.IMAP4_SSL(email_settings.imap_host)
     m.login(email_settings.email, email_settings.password)
     m.select("Inbox")
     status, unreadcount = m.status('INBOX', "(UNSEEN)")
-    unreadcount = int(unreadcount[0].split()[2].decode('utf-8').strip(').,]'))
+    unreadcount = int(unreadcount[0].split()[2].strip(').,]'))
 
     if unreadcount == 0:
         return {}
 
     items = m.search(None, "UNSEEN")
-    items = items[1][0].decode('utf-8').split(' ')
+    items = str(items[1]).strip('[\']').split(' ')
 
     result = {}
 
@@ -43,12 +35,12 @@ def get_unseen(email_settings):
         message = None
         resp, data = m.fetch(emailid, "(RFC822)")
         email_body = data[0][1]
-        mail = email.message_from_string(email_body.decode('utf-8'))
+        mail = email.message_from_string(email_body)
 
         email_msg = EmailMessage()
         email_msg.id = uid
         email_msg.email = email_settings.email
-        email_msg.from_email = parse_header(mail['from'])
+        email_msg.from_email = mail['from']
         email_msg.message = get_email_text(mail)
 
         result[uid] = email_msg
@@ -82,5 +74,5 @@ def check_settings(email_setting):
         status, unreadcount = m.status('INBOX', "(UNSEEN)")
         return True
     except Exception as e:
-        print('email check error: '+ str(e.message))
+        print 'email check error: '+ str(e.message)
         return False
