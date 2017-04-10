@@ -117,7 +117,7 @@ def clean_str(str):
 
         for line in lines:
             if not (re.match(r'^\s*$', line) and re.match(r'^\s*$', lastLine)):
-                result.append(line)
+                result.append(line.strip())
             lastLine = line
 
         return '\n'.join(result)
