@@ -3,16 +3,14 @@ __author__ = 'aydar'
 import MySQLdb
 import config
 import UserData
-
+from encryption import AESCipher
 
 class Database:
     def __init__(self):
         self.storage = {}
         self.db = MySQLdb.connect(host=config.db_host, user=config.db_username, passwd=config.db_password, db="telegraggdb", charset='utf8')
         self.db.autocommit(True)
-
-    def update_user(self, user):
-        self.storage[user.id] = user
+        self.__crypto = AESCipher(config.db_crypto_key)
 
     def get_user(self, user_id):
         cursor = self.db.cursor()
@@ -35,7 +33,7 @@ class Database:
     def add_email(self, user_id, email_settings):
         cursor = self.db.cursor()
         cursor.execute('INSERT INTO user_emails(user_id,email, password, imap_host, imap_port) values(%s,%s, %s, %s, %s)',
-                       (user_id, email_settings.email, email_settings.password, email_settings.imap_host, email_settings.imap_port))
+                       (user_id, email_settings.email, self.__crypto.encrypt(email_settings.password), email_settings.imap_host, email_settings.imap_port))
         self.db.commit()
 
     def get_emails(self, user_id):
@@ -50,6 +48,7 @@ class Database:
             for row in rows:
                 email = UserData.EmailSettings()
                 email.email, email.password, email.imap_host, email.imap_port = row
+                email.password = self.__crypto.decrypt(email.password)
                 result.append(email)
 
         return result

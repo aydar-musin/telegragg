@@ -49,7 +49,7 @@ def get_unseen(email_settings):
         else:
             if mail.get_content_type() == 'text/plain':
                 message = mail.get_payload(decode=True)
-            else:
+            elif mail.get_content_type() == 'text/html':
                 message = from_html(mail.get_payload(decode=True))
 
         email_msg = EmailMessage()
