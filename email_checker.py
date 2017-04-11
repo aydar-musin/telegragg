@@ -72,7 +72,12 @@ def check_settings(email_setting):
         m.login(email_setting.email, email_setting.password)
         m.select("Inbox")
         status, unreadcount = m.status('INBOX', "(UNSEEN)")
-        return True
+        unreadcount = int(unreadcount[0].split()[2].strip(').,]'))
+
+        if unreadcount >100: # temp solution
+            return False
+        else:
+            return True
     except Exception as e:
         print 'email check error: '+ str(e.message)
         return False
