@@ -7,8 +7,7 @@ from Database import dataStorage
 import UserData
 import config
 import email_checker
-from botan import botan
-
+import texts
 
 database = dataStorage.Database()
 bot = telebot.TeleBot(config.token)
@@ -30,7 +29,7 @@ def message_handler(message):
         user_states[user_id] = result[0]
         bot.send_message(user_id, result[1])
     except Exception as e:
-        bot.send_message(user_id, 'Error '+ e.message)
+        bot.send_message(user_id, texts.get_text(texts.error))
 
 # available states:
 WAIT_EMAIL = 'WAIT_EMAIL'
@@ -39,55 +38,43 @@ WAIT_PASSWORD = 'WAIT_PASSWORD'
 
 def react(state, user_id, message):
     if message == '/start':
-        return None, 'Hello! I can aggregate all your incoming emails and sent it to you through telegram. I use encryption and don\'t store your emails. So I\'m secure bot :)\nUse /add command to setup your email box. \nIf you have some questions or problems use /help command.'
+        return None, texts.get_text(texts.start_txt)
     if message == '/help':
-        return None, """
-        Possible commands:
-/add - add new email
-/list - show all added emails
-/help - show this message
-/start  - show bot description
-
-If you have problems with setting up your email make sure that:
-1) two factor authorization disabled on you email account
-2) enabled access by IMAP protocol
-
-Email for questions: a.musin@outlook.com
-        """
+        return None, texts.get_text(texts.help_txt)
     elif message == '/add':
-        return WAIT_EMAIL, 'Write your email address'
+        return WAIT_EMAIL, texts.get_text(texts.add_txt)
     elif message == '/list':
         emails = database.get_emails(user_id)
         if emails:
             result = ''
             for email in emails:
                 result = result + '\n' + email.email
-            return None, 'Here is your added emails:\n'+result
+            return None, texts.get_text(texts.list_txt)+result
     else:
         if state == WAIT_EMAIL:
             if not re.match(r'[^@]+@[^@]+\.[^@]+', message):
-                return WAIT_EMAIL, 'Not valid email. Try again'
+                return WAIT_EMAIL, texts.get_text(texts.not_valid_email)
             elif database.get_user(user_id) and message in [obj.email for obj in database.get_emails(user_id)]:
-                return WAIT_EMAIL, 'This email is already added. Try again'
+                return WAIT_EMAIL, texts.get_text(texts.email_already_added)
             else:
                 email = UserData.EmailSettings()
                 email.email = message
                 user_temp_emails[user_id] = email
 
-                return WAIT_PASSWORD, 'Write password. I use encryption to protect your data :)'
+                return WAIT_PASSWORD, texts.get_text(texts.wait_password)
         elif state == WAIT_PASSWORD:
             temp_email = None
 
             if user_temp_emails.has_key(user_id):
                 temp_email = user_temp_emails[user_id]
             else:
-                return None, 'Session was interrupted. Try to start again by typing /add'
+                return None, texts.get_text(texts.error)
 
             temp_email.password = message
             temp_email.imap_host = 'imap.'+temp_email.email.split('@')[1]
 
             if not email_checker.check_settings(temp_email):
-                return None, 'I can not connect to your email box. Check your email address and password or use /help command.'
+                return None, texts.get_text(texts.email_check_error)
 
             user = database.get_user(user_id)
 
@@ -99,7 +86,7 @@ Email for questions: a.musin@outlook.com
                 database.create_user(user)
                 database.add_email(user.id, temp_email)
 
-            return None, 'Email successfully added!'
+            return None, texts.get_text(texts.email_successfully_added)
 
 
 def check_event():
