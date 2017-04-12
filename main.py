@@ -7,6 +7,8 @@ from Database import dataStorage
 import UserData
 import config
 import email_checker
+from botan import botan
+
 
 database = dataStorage.Database()
 bot = telebot.TeleBot(config.token)
