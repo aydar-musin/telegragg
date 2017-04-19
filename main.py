@@ -8,6 +8,7 @@ import UserData
 import config
 import email_checker
 import texts
+from botan import botan
 
 database = dataStorage.Database()
 bot = telebot.TeleBot(config.token)
@@ -28,6 +29,9 @@ def message_handler(message):
         result = react(state, user_id, message.text)
         user_states[user_id] = result[0]
         bot.send_message(user_id, result[1])
+
+        botan.track(config.botan_api_key, user_id, None, message.text)
+
     except Exception as e:
         bot.send_message(user_id, texts.get_text(texts.error))
 
