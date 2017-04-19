@@ -14,7 +14,7 @@ __en_texts = {
     add_txt: 'Write your email address',
     list_txt: 'Here is your added emails:\n',
     help_txt: """
-        Possible commands:
+        Available commands:
 /add - add new email address
 /list - show all your added email addresses
 /help - show this message
