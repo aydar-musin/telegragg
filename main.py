@@ -9,6 +9,8 @@ import config
 import email_checker
 import texts
 from botan import botan
+import logger
+
 
 database = dataStorage.Database()
 bot = telebot.TeleBot(config.token)
@@ -30,10 +32,12 @@ def message_handler(message):
         user_states[user_id] = result[0]
         bot.send_message(user_id, result[1])
 
-        botan.track(config.botan_api_key, user_id, None, message.text)
+        botan.track(config.botan_api_key, user_id, {'input': message.text, 'reponse': result[1]}, message.text)
 
     except Exception as e:
         bot.send_message(user_id, texts.get_text(texts.error))
+        logger.error(str(e))
+
 
 # available states:
 WAIT_EMAIL = 'WAIT_EMAIL'
