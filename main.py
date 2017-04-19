@@ -94,6 +94,8 @@ def react(state, user_id, message):
                 database.create_user(user)
                 database.add_email(user.id, temp_email)
 
+            botan.track(config.botan_api_key, user_id, None, 'user added email')
+
             return None, texts.get_text(texts.email_successfully_added)
 
 
@@ -107,8 +109,10 @@ def check_event():
                 new_emails = email_checker.get_unseen(email_setting)
                 for email in new_emails.values():
                     bot.send_message(user.id, u'New email on: '+email.email.decode('utf-8')+u'\r\n-------\r\nFrom: '+email.from_email.decode('utf-8')+u'\r\n-------- \r\n\r\n '+ clean_str(get_unicode_str(email.message)))
+                    botan.track(config.botan_api_key, user.id, {'email':email.email}, 'email received')
     except Exception as e:
         print('error in check event '+e.message)
+        logger.error(str(e))
 
     threading.Timer(10, check_event).start()
 
