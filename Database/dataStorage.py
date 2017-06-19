@@ -32,14 +32,14 @@ class Database:
 
     def add_email(self, user_id, email_settings):
         cursor = self.db.cursor()
-        cursor.execute('INSERT INTO user_emails(user_id,email, password, imap_host, imap_port) values(%s,%s, %s, %s, %s)',
-                       (user_id, email_settings.email, self.__crypto.encrypt(email_settings.password), email_settings.imap_host, email_settings.imap_port))
+        cursor.execute('INSERT INTO user_emails(user_id, type, email, token, renew_token) values(%s,%s, %s, %s, %s)',
+                       (user_id, email_settings.type, email_settings.email, email_settings.token, email_settings.renew_token))
         self.db.commit()
 
     def get_emails(self, user_id):
         cursor = self.db.cursor()
 
-        cursor.execute('SELECT email, password, imap_host, imap_port from user_emails WHERE user_id=%s', [user_id])
+        cursor.execute('SELECT email, type, token, renew_token from user_emails WHERE user_id=%s', [user_id])
 
         rows = cursor.fetchall()
 
@@ -47,8 +47,7 @@ class Database:
         if rows and len(rows) > 0:
             for row in rows:
                 email = UserData.EmailSettings()
-                email.email, email.password, email.imap_host, email.imap_port = row
-                email.password = self.__crypto.decrypt(email.password)
+                email.email, email.type, email.token, email.renew_token = row
                 result.append(email)
 
         return result

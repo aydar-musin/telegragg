@@ -6,7 +6,7 @@ import telebot
 from Database import dataStorage
 import UserData
 import config
-import email_checker
+from EmailServices import EmailServices
 import texts
 from botan import botan
 import logger
@@ -14,6 +14,8 @@ import logger
 
 database = dataStorage.Database()
 bot = telebot.TeleBot(config.token)
+
+email_services = EmailServices.EmailServices()
 
 user_temp_emails = {}
 user_states = {}
@@ -39,18 +41,16 @@ def message_handler(message):
         logger.error(str(e))
 
 
-# available states:
-WAIT_EMAIL = 'WAIT_EMAIL'
-WAIT_PASSWORD = 'WAIT_PASSWORD'
-
-
 def react(state, user_id, message):
     if message == '/start':
-        return None, texts.get_text(texts.start_txt)
+        bot.send_message(user_id, texts.get_text(texts.start_txt))
+        return None
     if message == '/help':
-        return None, texts.get_text(texts.help_txt)
+        bot.send_message(user_id, texts.get_text(texts.help_txt))
+        return None
     elif message == '/add':
-        return WAIT_EMAIL, texts.get_text(texts.add_txt)
+        bot.send_message(user_id, texts.get_text(texts.add_txt), reply_markup=get_es_markup(user_id))
+
     elif message == '/list':
         emails = database.get_emails(user_id)
         if emails:
@@ -58,90 +58,23 @@ def react(state, user_id, message):
             for email in emails:
                 result = result + '\n' + email.email
             return None, texts.get_text(texts.list_txt)+result
-    else:
-        if state == WAIT_EMAIL:
-            if not re.match(r'[^@]+@[^@]+\.[^@]+', message):
-                return WAIT_EMAIL, texts.get_text(texts.not_valid_email)
-            elif database.get_user(user_id) and message in [obj.email for obj in database.get_emails(user_id)]:
-                return WAIT_EMAIL, texts.get_text(texts.email_already_added)
-            else:
-                email = UserData.EmailSettings()
-                email.email = message
-                user_temp_emails[user_id] = email
-
-                return WAIT_PASSWORD, texts.get_text(texts.wait_password)
-        elif state == WAIT_PASSWORD:
-            temp_email = None
-
-            if user_temp_emails.has_key(user_id):
-                temp_email = user_temp_emails[user_id]
-            else:
-                return None, texts.get_text(texts.error)
-
-            temp_email.password = message
-            temp_email.imap_host = 'imap.'+temp_email.email.split('@')[1]
-
-            if not email_checker.check_settings(temp_email):
-                return None, texts.get_text(texts.email_check_error)
-
-            user = database.get_user(user_id)
-
-            if user:
-                database.add_email(user.id, temp_email)
-            else:
-                user = UserData.User()
-                user.id = user_id
-                database.create_user(user)
-                database.add_email(user.id, temp_email)
-
-            botan.track(config.botan_api_key, user_id, None, 'user added email')
-
-            return None, texts.get_text(texts.email_successfully_added)
 
 
-def check_event():
-    try:
+# get email services markup
+def get_es_markup(user_id):
+    markup = telebot.types.InlineKeyboardMarkup(row_width=3)
+    es_types = email_services.get_service_types()
 
-        users = database.get_all_users()
+    for es_type in es_types:
+        markup.add(
+            telebot.types.InlineKeyboardButton(text=es_type,
+                                                      url=config.redirect_url
+                                               .replace('es_type', es_type).replace('user_id', user_id)))
 
-        for user in users:
-            for email_setting in user.emails:
-                new_emails = email_checker.get_unseen(email_setting)
-                for email in new_emails.values():
-                    bot.send_message(user.id, u'New email on: '+email.email.decode('utf-8')+u'\r\n-------\r\nFrom: '+email.from_email.decode('utf-8')+u'\r\n-------- \r\n\r\n '+ clean_str(get_unicode_str(email.message)))
-                    botan.track(config.botan_api_key, user.id, {'email':email.email}, 'email received')
-    except Exception as e:
-        print('error in check event '+e.message)
-        logger.error(str(e))
-
-    threading.Timer(10, check_event).start()
-
-
-def get_unicode_str(str):
-    try:
-        return str.decode('utf-8')
-    except:
-        return str
-
-
-def clean_str(str):
-    try:
-        result= []
-        lines = str.split('\n')
-        lastLine = 'initial str'
-
-        for line in lines:
-            if not (re.match(r'^\s*$', line) and re.match(r'^\s*$', lastLine)):
-                result.append(line.strip())
-            lastLine = line
-
-        return '\n'.join(result)
-    except Exception as e:
-        print e.message
-        return  str
+    return markup
 
 print 'starting...'
-check_event()
+# check_event()
 
 if(__name__=='__main__'):
     bot.polling(none_stop=True)

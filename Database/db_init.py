@@ -20,9 +20,9 @@ CREATE TABLE user_emails(
     id int primary key auto_increment,
     user_id int,
     email varchar(100) NOT NULL,
-    password varchar(500) NOT NULL,
-    imap_host varchar(100),
-    imap_port varchar(100),
+    type varchar(100) NOT NULL,
+    token varchar(100) NOT NULL,
+    renew_token varchar(100) NOT NULL,
     creation_time TIMESTAMP default CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id)
         REFERENCES users(id)

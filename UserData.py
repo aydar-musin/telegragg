@@ -12,6 +12,6 @@ class User:
 class EmailSettings:
     def __init__(self):
         self.email = None
-        self.password = None
-        self.imap_host = None
-        self.imap_port = None
+        self.type = None
+        self.token = None
+        self.renew_token = None
