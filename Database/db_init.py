@@ -22,7 +22,8 @@ CREATE TABLE user_emails(
     email varchar(100) NOT NULL,
     type varchar(100) NOT NULL,
     token varchar(100) NOT NULL,
-    renew_token varchar(100) NOT NULL,
+    refresh_token varchar(100),
+    expire_time TIMESTAMP,
     creation_time TIMESTAMP default CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id)
         REFERENCES users(id)

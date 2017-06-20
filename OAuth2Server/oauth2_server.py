@@ -1,17 +1,18 @@
 import json
 
 import flask
-import httplib2
-
 from oauth2client import client
-
 from oauth2client.client import OAuth2WebServerFlow
 from EmailServices import EmailServices
 import os
 import sys
+from UserData import EmailSettings
+from Database.dataStorage import Database
+
 
 app = flask.Flask(__name__)
 
+db = Database()
 
 @app.route('/oa2redirect/<es_type>/<user_id>')
 def oa2redirect(es_type, user_id):
@@ -31,7 +32,7 @@ def oa2callback():
         auth_code = flask.request.args.get('code')
         es_type = flask.session['es_type']
         user_id = flask.session['user_id']
-        
+
         flask.session.pop('es_type', None)
         flask.session.pop('user_id', None)
 
@@ -39,9 +40,20 @@ def oa2callback():
             flow = get_google_flow(user_id)
             credentials = flow.step2_exchange(auth_code)
 
-            return credentials.to_json()
+            email_stngs = EmailSettings()
+            email_stngs.user_id = user_id
+            email_stngs.type = es_type
+            email_stngs.token = credentials.access_token
+            email_stngs.expire_time = credentials.token_expiry
+            email_stngs.refresh_token = credentials.refresh_token
+
+            db.add_email(user_id, email_stngs)
+
+            return "Successfully logged in"
         else:
             return "Unknown es_type"
+    else:
+        return "Authorization error"
 
 
 def get_google_flow(user_id):

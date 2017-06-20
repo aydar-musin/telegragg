@@ -14,4 +14,5 @@ class EmailSettings:
         self.email = None
         self.type = None
         self.token = None
-        self.renew_token = None
+        self.refresh_token = None
+        self.expire_time = None

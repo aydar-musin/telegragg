@@ -3,14 +3,13 @@ __author__ = 'aydar'
 import MySQLdb
 import config
 import UserData
-from encryption import AESCipher
+
 
 class Database:
     def __init__(self):
         self.storage = {}
         self.db = MySQLdb.connect(host=config.db_host, user=config.db_username, passwd=config.db_password, db="telegraggdb", charset='utf8')
         self.db.autocommit(True)
-        self.__crypto = AESCipher(config.db_crypto_key)
 
     def get_user(self, user_id):
         cursor = self.db.cursor()
@@ -32,14 +31,14 @@ class Database:
 
     def add_email(self, user_id, email_settings):
         cursor = self.db.cursor()
-        cursor.execute('INSERT INTO user_emails(user_id, type, email, token, renew_token) values(%s,%s, %s, %s, %s)',
-                       (user_id, email_settings.type, email_settings.email, email_settings.token, email_settings.renew_token))
+        cursor.execute('INSERT INTO user_emails(user_id, type, email, token, refresh_token, expire_time) values(%s,%s, %s, %s, %s, %s)',
+                       (user_id, email_settings.type, email_settings.email, email_settings.token, email_settings.refresh_token, email_settings.expire_time))
         self.db.commit()
 
     def get_emails(self, user_id):
         cursor = self.db.cursor()
 
-        cursor.execute('SELECT email, type, token, renew_token from user_emails WHERE user_id=%s', [user_id])
+        cursor.execute('SELECT email, type, token, refresh_token, expire_time from user_emails WHERE user_id=%s', [user_id])
 
         rows = cursor.fetchall()
 
@@ -47,7 +46,7 @@ class Database:
         if rows and len(rows) > 0:
             for row in rows:
                 email = UserData.EmailSettings()
-                email.email, email.type, email.token, email.renew_token = row
+                email.email, email.type, email.token, email.refresh_token, email.expire_time = row
                 result.append(email)
 
         return result
