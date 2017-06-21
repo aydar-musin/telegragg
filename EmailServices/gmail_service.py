@@ -8,10 +8,10 @@ class GmailService:
 
 
     @staticmethod
-    def get_flow(callback_uri):
-        return client.flow_from_clientsecrets('secrets/google.json',
+    def get_flow():
+        return client.flow_from_clientsecrets('./EmailServices/secrets/google.json',
             scope='https://www.googleapis.com/auth/gmail.readonly',
-            redirect_uri=callback_uri)
+            redirect_uri=config.callback_url)
 
     def get_auth_link(self, user_id, redirect_uri):
         flow = GmailService.get_flow(user_id)

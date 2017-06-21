@@ -16,7 +16,7 @@ db = Database()
 @app.route('/oa2redirect/<es_type>/<user_id>')
 def oa2redirect(es_type, user_id):
     if es_type == 'gmail':
-        flow = GmailService.get_flow(flask.url_for('oa2callback'))
+        flow = GmailService.get_flow()
         auth_uri = flow.step1_get_authorize_url()
         flask.session['user_id'] = user_id
         flask.session['es_type'] = es_type
@@ -36,7 +36,7 @@ def oa2callback():
         flask.session.pop('user_id', None)
 
         if es_type == 'gmail':
-            flow = GmailService.get_flow(flask.url_for('oa2callback'))
+            flow = GmailService.get_flow()
             credentials = flow.step2_exchange(auth_code)
 
             email_stngs = EmailSettings()
