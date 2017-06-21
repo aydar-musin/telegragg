@@ -1,8 +1,7 @@
 import json
 
 import flask
-from oauth2client import client
-from oauth2client.client import OAuth2WebServerFlow
+from EmailServices.gmail_service import GmailService
 import os
 import sys
 from UserData import EmailSettings, User
@@ -17,7 +16,7 @@ db = Database()
 @app.route('/oa2redirect/<es_type>/<user_id>')
 def oa2redirect(es_type, user_id):
     if es_type == 'gmail':
-        flow = get_google_flow(user_id)
+        flow = GmailService.get_flow(flask.url_for('oa2callback'))
         auth_uri = flow.step1_get_authorize_url()
         flask.session['user_id'] = user_id
         flask.session['es_type'] = es_type
@@ -37,7 +36,7 @@ def oa2callback():
         flask.session.pop('user_id', None)
 
         if es_type == 'gmail':
-            flow = get_google_flow(user_id)
+            flow = GmailService.get_flow(flask.url_for('oa2callback'))
             credentials = flow.step2_exchange(auth_code)
 
             email_stngs = EmailSettings()
@@ -56,24 +55,11 @@ def oa2callback():
 
             db.add_email(user_id, email_stngs)
 
-            return "Successfully logged in"
+            return "Successfully logged in\n\n"+credentials.to_json()
         else:
             return "Unknown es_type"
     else:
         return "Authorization error"
-
-
-def get_google_flow(user_id):
-    return client.flow_from_clientsecrets(
-        os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'EmailServices/secrets/google.json')),
-        scope='https://www.googleapis.com/auth/gmail.readonly',
-        redirect_uri=flask.url_for('oa2callback', _external=True))
-"""   return OAuth2WebServerFlow(client_id='1048164942148-j779t9t942gfsai79fhu8fq43cvk6i6e.apps.googleusercontent.com',
-                           client_secret='sqpZVGgSB812NqD2a3v2OX8L',
-                           scope='https://www.googleapis.com/auth/gmail.readonly',
-                           redirect_uri=flask.url_for('oa2callback', es_type='gmail', user_id=user_id ,_external=True),
-                               )
-"""
 
 
 if __name__ == '__main__':

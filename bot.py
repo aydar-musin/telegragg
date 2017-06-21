@@ -24,12 +24,9 @@ user_states = {}
 def message_handler(message):
     try:
         user_id = message.chat.id
-        state = None
 
-        if user_id in user_states:
-            state = user_states[user_id]
 
-        react(state, user_id, message.text)
+        react(user_id, message.text)
 
         botan.track(config.botan_api_key, user_id, {'input': message.text}, message.text)
     except Exception as e:
@@ -37,7 +34,7 @@ def message_handler(message):
         logger.error(str(e))
 
 
-def react(state, user_id, message):
+def react(user_id, message):
     if message == '/start':
         bot.send_message(user_id, texts.get_text(texts.start_txt))
     if message == '/help':
