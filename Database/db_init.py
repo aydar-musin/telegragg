@@ -19,7 +19,7 @@ CREATE TABLE users(
 CREATE TABLE user_emails(
     id int primary key auto_increment,
     user_id int,
-    email varchar(100) NOT NULL,
+    email varchar(100) NULL,
     type varchar(100) NOT NULL,
     token varchar(100) NOT NULL,
     refresh_token varchar(100),

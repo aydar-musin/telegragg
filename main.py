@@ -20,7 +20,6 @@ email_services = EmailServices.EmailServices()
 user_temp_emails = {}
 user_states = {}
 
-
 @bot.message_handler(content_types=['text'])
 def message_handler(message):
     try:
@@ -30,9 +29,7 @@ def message_handler(message):
         if user_id in user_states:
             state = user_states[user_id]
 
-        result = react(state, user_id, message.text)
-        user_states[user_id] = result[0]
-        bot.send_message(user_id, result[1])
+        react(state, user_id, message.text)
 
         botan.track(config.botan_api_key, user_id, {'input': message.text, 'reponse': result[1]}, message.text)
 
@@ -44,20 +41,18 @@ def message_handler(message):
 def react(state, user_id, message):
     if message == '/start':
         bot.send_message(user_id, texts.get_text(texts.start_txt))
-        return None
     if message == '/help':
         bot.send_message(user_id, texts.get_text(texts.help_txt))
-        return None
     elif message == '/add':
         bot.send_message(user_id, texts.get_text(texts.add_txt), reply_markup=get_es_markup(user_id))
-
     elif message == '/list':
         emails = database.get_emails(user_id)
         if emails:
             result = ''
             for email in emails:
                 result = result + '\n' + email.email
-            return None, texts.get_text(texts.list_txt)+result
+
+            bot.send_message(user_id, texts.get_text(texts.list_txt)+result)
 
 
 # get email services markup
@@ -69,7 +64,7 @@ def get_es_markup(user_id):
         markup.add(
             telebot.types.InlineKeyboardButton(text=es_type,
                                                       url=config.redirect_url
-                                               .replace('es_type', es_type).replace('user_id', user_id)))
+                                               .replace('es_type', es_type).replace('user_id', str(user_id))))
 
     return markup
 

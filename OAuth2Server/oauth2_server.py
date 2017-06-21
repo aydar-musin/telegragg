@@ -3,7 +3,6 @@ import json
 import flask
 from oauth2client import client
 from oauth2client.client import OAuth2WebServerFlow
-from EmailServices import EmailServices
 import os
 import sys
 from UserData import EmailSettings
