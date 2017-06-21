@@ -6,6 +6,7 @@ from oauth2client.client import OAuth2WebServerFlow
 import os
 import sys
 from UserData import EmailSettings
+
 from Database.dataStorage import Database
 
 
@@ -72,4 +73,4 @@ if __name__ == '__main__':
   import uuid
   app.secret_key = str(uuid.uuid4())
   app.debug = True
-  app.run()
+  app.run(host='0.0.0.0', port=int(sys.argv[1]))
