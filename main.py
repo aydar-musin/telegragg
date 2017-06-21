@@ -31,8 +31,7 @@ def message_handler(message):
 
         react(state, user_id, message.text)
 
-        botan.track(config.botan_api_key, user_id, {'input': message.text, 'reponse': result[1]}, message.text)
-
+        botan.track(config.botan_api_key, user_id, {'input': message.text}, message.text)
     except Exception as e:
         bot.send_message(user_id, texts.get_text(texts.error))
         logger.error(str(e))

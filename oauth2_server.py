@@ -53,7 +53,7 @@ def oa2callback():
                 user = User()
                 user.id = user_id
                 db.create_user(user)
-            
+
             db.add_email(user_id, email_stngs)
 
             return "Successfully logged in"
