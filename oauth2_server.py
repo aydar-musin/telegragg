@@ -5,7 +5,7 @@ from oauth2client import client
 from oauth2client.client import OAuth2WebServerFlow
 import os
 import sys
-from UserData import EmailSettings
+from UserData import EmailSettings, User
 
 from Database.dataStorage import Database
 
@@ -47,6 +47,13 @@ def oa2callback():
             email_stngs.expire_time = credentials.token_expiry
             email_stngs.refresh_token = credentials.refresh_token
 
+            user = db.get_user(user_id)
+
+            if not user:
+                user = User()
+                user.id = user_id
+                db.create_user(user)
+            
             db.add_email(user_id, email_stngs)
 
             return "Successfully logged in"
