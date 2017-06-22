@@ -5,7 +5,7 @@ from EmailServices.gmail_service import GmailService
 import os
 import sys
 from UserData import EmailSettings, User
-
+import logger
 from Database.dataStorage import Database
 
 
@@ -38,9 +38,11 @@ def oa2callback():
         if es_type == 'gmail':
             flow = GmailService.get_flow()
             credentials = flow.step2_exchange(auth_code)
+            email_addr = GmailService.get_user_email(credentials)
 
             email_stngs = EmailSettings()
             email_stngs.user_id = user_id
+            email_stngs.email = email_addr
             email_stngs.type = es_type
             email_stngs.token = credentials.access_token
             email_stngs.expire_time = credentials.token_expiry

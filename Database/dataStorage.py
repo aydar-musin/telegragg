@@ -18,7 +18,7 @@ class Database:
         rows = cursor.fetchall()
 
         if rows and len(rows)>0:
-            user = UserData.User
+            user = UserData.User()
             user.id, user.name, user.creation_time = rows[0]
             return user
         else:

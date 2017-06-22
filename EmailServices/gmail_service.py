@@ -1,6 +1,8 @@
 import config
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client import client
+import httplib2
+import json
 
 class GmailService:
     def __init__(self):
@@ -13,6 +15,13 @@ class GmailService:
             scope='https://www.googleapis.com/auth/gmail.readonly',
             redirect_uri=config.callback_url)
 
-    def get_auth_link(self, user_id, redirect_uri):
-        flow = GmailService.get_flow(user_id)
-        return flow.step1_get_authorize_url()
+    @staticmethod
+    def get_user_email(credentials):
+        http = credentials.authorize(httplib2.Http())
+        resp, content = http.request('https://www.googleapis.com/gmail/v1/users/me/profile', 'GET')
+
+        if not content:
+            raise Exception('error fetching user email address')
+
+        response = json.loads(content)
+        return response['emailAddress']
