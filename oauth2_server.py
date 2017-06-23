@@ -13,6 +13,17 @@ app = flask.Flask(__name__)
 
 db = Database()
 
+@app.route('/')
+def index():
+    msg = None
+
+    if 'result' in flask.request.args and flask.request.args['result'] == 'success':
+        msg = 'Your email successfully added'
+    elif 'result' in flask.request.args and flask.request.args['result'] == 'fail':
+        msg = 'Error occurred'
+
+    return flask.render_template('index.html', msg=msg)
+
 @app.route('/oa2redirect/<es_type>/<user_id>')
 def oa2redirect(es_type, user_id):
     if es_type == 'gmail':
@@ -57,11 +68,11 @@ def oa2callback():
 
             db.add_email(user_id, email_stngs)
 
-            return "Successfully logged in\n\n"+credentials.to_json()
+            return flask.redirect(flask.url_for('/', result='success'))
         else:
             return "Unknown es_type"
     else:
-        return "Authorization error"
+        return flask.redirect(flask.url_for('/', result='fail'))
 
 
 if __name__ == '__main__':
