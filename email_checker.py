@@ -3,7 +3,7 @@ __author__ = 'aydar'
 import email
 from bs4 import BeautifulSoup
 import imaplib
-
+import base64
 from EmailMessage import EmailMessage
 
 est_host_map={'gmail':'imap.gmail.com'}
@@ -18,6 +18,7 @@ def from_html(html):
 
 def get_unseen(email_settings):
     m = imaplib.IMAP4_SSL(est_host_map[email_settings.type])
+    m.debug = True
     auth_string = 'user=%s\1auth=Bearer %s\1\1' % (email_settings.email, email_settings.token)
     m.authenticate('XOAUTH2',lambda x:auth_string)
     m.select("Inbox")

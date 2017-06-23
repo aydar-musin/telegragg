@@ -12,7 +12,7 @@ class GmailService:
     @staticmethod
     def get_flow():
         return client.flow_from_clientsecrets('./EmailServices/secrets/google.json',
-            scope='https://www.googleapis.com/auth/gmail.readonly',
+            scope='https://www.googleapis.com/auth/gmail.readonly https://mail.google.com/',
             redirect_uri=config.callback_url)
 
     @staticmethod
