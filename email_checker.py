@@ -6,6 +6,7 @@ import imaplib
 
 from EmailMessage import EmailMessage
 
+est_host_map={'gmail':'imap.gmail.com'}
 
 def from_html(html):
     soup = BeautifulSoup(html)
@@ -16,8 +17,9 @@ def from_html(html):
 
 
 def get_unseen(email_settings):
-    m = imaplib.IMAP4_SSL(email_settings.imap_host)
-    m.login(email_settings.email, email_settings.password)
+    m = imaplib.IMAP4_SSL(est_host_map[email_settings.type])
+    auth_string = 'user=%s\1auth=Bearer %s\1\1' % (email_settings.email, email_settings.token)
+    m.authenticate('XOAUTH2',lambda x:auth_string)
     m.select("Inbox")
     status, unreadcount = m.status('INBOX', "(UNSEEN)")
     unreadcount = int(unreadcount[0].split()[2].strip(').,]'))
