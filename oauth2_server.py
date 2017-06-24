@@ -24,7 +24,6 @@ def index():
 
     return flask.render_template('index.html', msg=msg)
 
-
 @app.route('/privacy')
 def privacy():
     return flask.render_template('privacy.html')
@@ -82,7 +81,13 @@ def oa2callback():
 
 
 if __name__ == '__main__':
-  import uuid
-  app.secret_key = str(uuid.uuid4())
-  app.debug = True
-  app.run(host='0.0.0.0', port=int(sys.argv[1]))
+    import uuid
+    app.secret_key = str(uuid.uuid4())
+    app.debug = True
+
+    from OpenSSL import SSL
+    context = SSL.Context(SSL.SSLv23_METHOD)
+    context.use_privatekey_file('ssl/private.key')
+    context.use_certificate_file('ssl/telegra.email.crt')
+
+    app.run(host='0.0.0.0', port=int(sys.argv[1]), ssl_context=context)
