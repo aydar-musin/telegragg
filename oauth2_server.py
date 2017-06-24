@@ -24,6 +24,12 @@ def index():
 
     return flask.render_template('index.html', msg=msg)
 
+
+@app.route('/privacy')
+def privacy():
+    return flask.render_template('privacy.html')
+
+
 @app.route('/oa2redirect/<es_type>/<user_id>')
 def oa2redirect(es_type, user_id):
     if es_type == 'gmail':
