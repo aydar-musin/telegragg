@@ -10,6 +10,8 @@ from Database.dataStorage import Database
 
 
 app = flask.Flask(__name__)
+import uuid
+app.secret_key = str(uuid.uuid4())
 
 db = Database()
 
@@ -81,13 +83,8 @@ def oa2callback():
 
 
 if __name__ == '__main__':
-    import uuid
-    app.secret_key = str(uuid.uuid4())
     app.debug = True
 
-    from OpenSSL import SSL
-    context = SSL.Context(SSL.SSLv23_METHOD)
-    context.use_privatekey_file('ssl/private.key')
-    context.use_certificate_file('ssl/telegra.email.crt')
+    context = ('ssl/private.key', 'ssl/telegra.email.crt')
 
     app.run(host='0.0.0.0', port=int(sys.argv[1]), ssl_context=context)

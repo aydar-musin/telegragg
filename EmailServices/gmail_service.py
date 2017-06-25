@@ -3,6 +3,7 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client import client
 import httplib2
 import json
+import os
 
 class GmailService:
     def __init__(self):
@@ -11,8 +12,8 @@ class GmailService:
 
     @staticmethod
     def get_flow():
-        return client.flow_from_clientsecrets('./EmailServices/secrets/google.json',
-            scope='https://www.googleapis.com/auth/gmail.readonly https://mail.google.com/',
+        return client.flow_from_clientsecrets(os.path.dirname(os.path.abspath(__file__))+'/secrets/google.json',
+            scope='https://www.googleapis.com/auth/gmail.readonly https://mail.google.com',
             redirect_uri=config.callback_url)
 
     @staticmethod
