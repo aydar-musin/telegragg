@@ -75,16 +75,13 @@ def oa2callback():
 
             db.add_email(user_id, email_stngs)
 
-            return flask.redirect(flask.url_for('/', result='success'))
+            return flask.redirect('/?result=success')
         else:
             return "Unknown es_type"
     else:
-        return flask.redirect(flask.url_for('/', result='fail'))
+        return flask.redirect('/?result=fail')
 
 
 if __name__ == '__main__':
     app.debug = True
-
-    context = ('ssl/private.key', 'ssl/telegra.email.crt')
-
-    app.run(host='0.0.0.0', port=int(sys.argv[1]), ssl_context=context)
+    app.run(host='127.0.0.1', port=int(sys.argv[1]))
