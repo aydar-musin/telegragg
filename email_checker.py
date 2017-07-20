@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import imaplib
 import base64
 from EmailMessage import EmailMessage
+from EmailServices.EmailServices import EmailServices
 
 est_host_map={'gmail':'imap.gmail.com'}
 
@@ -17,20 +18,9 @@ def from_html(html):
 
 
 def get_unseen(email_settings):
-    m = imaplib.IMAP4_SSL(est_host_map[email_settings.type])
-    m.debug = True
-    auth_string = 'user=%s\1auth=Bearer %s\1\1' % (email_settings.email, email_settings.token)
-    m.authenticate('XOAUTH2',lambda x:auth_string)
-    m.select("Inbox")
-    status, unreadcount = m.status('INBOX', "(UNSEEN)")
-    unreadcount = int(unreadcount[0].split()[2].strip(').,]'))
+    service = EmailServices.get_service(email_settings.type, email_settings.auth_data)
 
-    if unreadcount == 0:
-        return {}
-
-    items = m.search(None, "UNSEEN")
-    items = str(items[1]).strip('[\']').split(' ')
-
+    emails = service.get_unread_emails()
     result = {}
 
     for index, emailid in enumerate(items[:10]):

@@ -13,6 +13,4 @@ class EmailSettings:
     def __init__(self):
         self.email = None
         self.type = None
-        self.token = None
-        self.refresh_token = None
-        self.expire_time = None
+        self.auth_data = None

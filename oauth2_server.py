@@ -55,16 +55,14 @@ def oa2callback():
 
         if es_type == 'gmail':
             flow = GmailService.get_flow()
-            credentials = flow.step2_exchange(auth_code)
-            email_addr = GmailService.get_user_email(credentials)
+            credentials = flow.step2_exchange(auth_code).to_json()
+            email_addr = GmailService(credentials).get_user_email()
 
             email_stngs = EmailSettings()
             email_stngs.user_id = user_id
             email_stngs.email = email_addr
             email_stngs.type = es_type
-            email_stngs.token = credentials.access_token
-            email_stngs.expire_time = credentials.token_expiry
-            email_stngs.refresh_token = credentials.refresh_token
+            email_stngs.auth_data = credentials
 
             user = db.get_user(user_id)
 
@@ -84,4 +82,8 @@ def oa2callback():
 
 if __name__ == '__main__':
     app.debug = True
-    app.run(host='127.0.0.1', port=int(sys.argv[1]))
+    port = 5000
+    if len(sys.argv) > 1:
+        port = sys.argv[1]
+
+    app.run(host='127.0.0.1', port=int(port))

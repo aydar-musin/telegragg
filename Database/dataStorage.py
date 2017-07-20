@@ -31,14 +31,14 @@ class Database:
 
     def add_email(self, user_id, email_settings):
         cursor = self.db.cursor()
-        cursor.execute('INSERT INTO user_emails(user_id, type, email, token, refresh_token, expire_time) values(%s,%s, %s, %s, %s, %s)',
-                       (user_id, email_settings.type, email_settings.email, email_settings.token, email_settings.refresh_token, email_settings.expire_time))
+        cursor.execute('INSERT INTO user_emails(user_id, type, email,auth_data) values(%s,%s, %s, %s)',
+                       (user_id, email_settings.type, email_settings.email, email_settings.auth_data))
         self.db.commit()
 
     def get_emails(self, user_id):
         cursor = self.db.cursor()
 
-        cursor.execute('SELECT email, type, token, refresh_token, expire_time from user_emails WHERE user_id=%s', [user_id])
+        cursor.execute('SELECT email, type, auth_data from user_emails WHERE user_id=%s', [user_id])
 
         rows = cursor.fetchall()
 
@@ -46,7 +46,7 @@ class Database:
         if rows and len(rows) > 0:
             for row in rows:
                 email = UserData.EmailSettings()
-                email.email, email.type, email.token, email.refresh_token, email.expire_time = row
+                email.email, email.type, email.auth_data = row
                 result.append(email)
 
         return result
