@@ -6,6 +6,7 @@ import json
 import os
 from apiclient import discovery
 from EmailMessage import EmailMessage
+import email_parser
 
 class GmailService:
     def __init__(self, credentials):
@@ -35,5 +36,54 @@ class GmailService:
 
         for msg in response['messages']:
             message = self.gmail.users().messages().get(userId='me', id=msg['id']).execute()
-            email = EmailMessage()
+            parsed_message = GmailService.parse_message(message)
+            parsed_message.id = msg['id']
+            result.append(parsed_message)
 
+        return result
+
+    @staticmethod
+    def parse_message(msg):
+        email = EmailMessage()
+
+        for header in msg['payload']['headers']:
+            if header['name'] == 'From':
+                email.from_email = header['value']
+            elif header['name'] == 'Subject':
+                email.subject = header['value']
+            elif header['name'] == 'To':
+                email.email = header['value']
+
+        email.message = GmailService.get_payload_message(msg['payload'])
+
+        return email
+
+    @staticmethod
+    def get_payload_message(payload):
+        transfer_encoding = None
+        mime_type = payload['mimeType']
+
+        for header in payload['headers']:
+            if header['name'] == 'Content-Transfer-Encoding':
+                transfer_encoding = header['value']
+                break
+
+        if payload['mimeType'] == 'multipart/alternative':
+            payload['parts'].sort()
+            for part in payload['parts']:
+                res = GmailService.get_payload_message(part)
+                if res:
+                    return res
+        elif mime_type == 'text/html':
+            return email_parser.from_html(payload['body']['data'].encode('UTF-8'), transfer_encoding)
+        elif mime_type == 'text/plain':
+            if transfer_encoding == 'base64':
+                return email_parser.from_base64(payload['body']['data'].encode('UTF-8'))
+            elif transfer_encoding == 'quoted-printable':
+                return email_parser.from_quoted_printable(email_parser.from_base64(payload['body']['data'].encode('UTF-8')))
+            elif not transfer_encoding:
+                return email_parser.clean_str(payload['body']['data'].encode('UTF-8'))
+            else:
+                raise Exception('Not supported transfer encoding')
+        else:
+            return None

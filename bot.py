@@ -72,8 +72,8 @@ def check_event():
         for user in users:
             for email_setting in user.emails:
                 new_emails = email_checker.get_unseen(email_setting)
-                for email in new_emails.values():
-                    bot.send_message(user.id, u'New email on: '+email.email.decode('utf-8')+u'\r\n-------\r\nFrom: '+email.from_email.decode('utf-8')+u'\r\n-------- \r\n\r\n '+ clean_str(get_unicode_str(email.message)))
+                for email in new_emails:
+                    bot.send_message(user.id, u'New email on: '+email.email.decode('utf-8')+u'\r\n-------\r\nFrom: '+email.from_email.decode('utf-8')+u'\r\n-------- \r\n\r\n '+ email.message)
                     botan.track(config.botan_api_key, user.id, {'email':email.email}, 'email received')
     except Exception as e:
         print('error in check event '+e.message)
@@ -89,21 +89,7 @@ def get_unicode_str(str):
         return str
 
 
-def clean_str(str):
-    try:
-        result= []
-        lines = str.split('\n')
-        lastLine = 'initial str'
 
-        for line in lines:
-            if not (re.match(r'^\s*$', line) and re.match(r'^\s*$', lastLine)):
-                result.append(line.strip())
-            lastLine = line
-
-        return '\n'.join(result)
-    except Exception as e:
-        print e.message
-        return  str
 
 print 'starting...'
 check_event()
