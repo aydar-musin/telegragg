@@ -14,3 +14,4 @@ class EmailSettings:
         self.email = None
         self.type = None
         self.auth_data = None
+        self.last_message_id = None

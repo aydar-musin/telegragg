@@ -6,7 +6,7 @@ import telebot
 from Database import dataStorage
 import UserData
 import config
-from EmailServices import EmailServices
+from EmailServices.EmailServices import EmailServices
 import texts
 from botan import botan
 import logger
@@ -15,7 +15,6 @@ import email_checker
 database = dataStorage.Database()
 bot = telebot.TeleBot(config.token)
 
-email_services = EmailServices.EmailServices()
 
 user_temp_emails = {}
 user_states = {}
@@ -54,7 +53,7 @@ def react(user_id, message):
 # get email services markup
 def get_es_markup(user_id):
     markup = telebot.types.InlineKeyboardMarkup(row_width=3)
-    es_types = email_services.get_service_types()
+    es_types = EmailServices.get_service_types()
 
     for es_type in es_types:
         markup.add(
@@ -63,6 +62,14 @@ def get_es_markup(user_id):
                                                .replace('es_type', es_type).replace('user_id', str(user_id))))
 
     return markup
+
+
+def get_message_text(msg):
+    return u'\r\n'+msg.subject+\
+           u'\r\nNew email on: ' +\
+           msg.email+u'\r\nFrom: '+msg.from_email+\
+           u'\r\n-------- \r\n\r\n '+ msg.message[:3800]
+
 
 def check_event():
     try:
@@ -73,21 +80,13 @@ def check_event():
             for email_setting in user.emails:
                 new_emails = email_checker.get_unseen(email_setting)
                 for email in new_emails:
-                    bot.send_message(user.id, u'New email on: '+email.email.decode('utf-8')+u'\r\n-------\r\nFrom: '+email.from_email.decode('utf-8')+u'\r\n-------- \r\n\r\n '+ email.message)
+                    bot.send_message(user.id, get_message_text(email))
                     botan.track(config.botan_api_key, user.id, {'email':email.email}, 'email received')
     except Exception as e:
         print('error in check event '+e.message)
         logger.error(str(e))
 
     threading.Timer(10, check_event).start()
-
-
-def get_unicode_str(str):
-    try:
-        return str.decode('utf-8')
-    except:
-        return str
-
 
 
 

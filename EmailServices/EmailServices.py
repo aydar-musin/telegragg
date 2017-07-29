@@ -6,6 +6,10 @@ class EmailServices:
         self.field = None
 
     @staticmethod
+    def get_service_types():
+        return ['gmail']
+
+    @staticmethod
     def get_service(type, credentials):
         if type == 'gmail':
             return GmailService(credentials)

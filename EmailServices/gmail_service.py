@@ -34,11 +34,17 @@ class GmailService:
         result = []
         response = self.gmail.users().messages().list(userId='me', labelIds=['INBOX', 'UNREAD']).execute()
 
+        if 'messages' not in response:
+            return result
+
         for msg in response['messages']:
             message = self.gmail.users().messages().get(userId='me', id=msg['id']).execute()
             parsed_message = GmailService.parse_message(message)
             parsed_message.id = msg['id']
             result.append(parsed_message)
+
+            #mark the message as read
+            self.gmail.users().messages().modify(userId='me', id=msg['id'], body={ 'removeLabelIds': ['UNREAD']}).execute()
 
         return result
 
@@ -68,7 +74,7 @@ class GmailService:
                 transfer_encoding = header['value']
                 break
 
-        if payload['mimeType'] == 'multipart/alternative':
+        if 'multipart' in payload['mimeType']:
             payload['parts'].sort()
             for part in payload['parts']:
                 res = GmailService.get_payload_message(part)
@@ -81,6 +87,8 @@ class GmailService:
                 return email_parser.from_base64(payload['body']['data'].encode('UTF-8'))
             elif transfer_encoding == 'quoted-printable':
                 return email_parser.from_quoted_printable(email_parser.from_base64(payload['body']['data'].encode('UTF-8')))
+            elif transfer_encoding == '8bit':
+                return email_parser.from_quoted_printable(email_parser.from_base64(payload['body']['data'].econde('UTF-8')))
             elif not transfer_encoding:
                 return email_parser.clean_str(payload['body']['data'].encode('UTF-8'))
             else:
