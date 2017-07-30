@@ -30,6 +30,13 @@ class Database:
         self.db.commit()
 
     def add_email(self, user_id, email_settings):
+
+        exist_emails = self.get_emails(user_id)
+
+        # check if this email is already added
+        if any(e.email == email_settings.email and e.type == email_settings.type for e in exist_emails):
+            return
+
         cursor = self.db.cursor()
         cursor.execute('INSERT INTO user_emails(user_id, type, email,auth_data) values(%s,%s, %s, %s)',
                        (user_id, email_settings.type, email_settings.email, email_settings.auth_data))
