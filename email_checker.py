@@ -2,12 +2,18 @@ __author__ = 'aydar'
 
 from EmailMessage import EmailMessage
 from EmailServices.EmailServices import EmailServices
+from Database.dataStorage import Database
 
 est_host_map={'gmail':'imap.gmail.com'}
+db = Database()
 
 
 def get_unseen(email_settings):
     service = EmailServices.get_service(email_settings.type, email_settings.auth_data)
+
+    result = service.refresh_auth_data()
+    if result[0]:
+        db.update_auth_data(email_settings.id, result[1])
 
     messages = service.get_unread_emails()
 

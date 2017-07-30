@@ -10,7 +10,7 @@ email_check_error = 'email_check_error'
 email_successfully_added = 'email_successfully_added'
 
 __en_texts = {
-    start_txt : 'Hello! I can aggregate all your incoming emails and sent it to your Telegram. I use encryption and don\'t store your emails. So I\'m secure bot :)\nUse /add command to setup your email box. \nIf you have some questions or problems use /help command.',
+    start_txt : 'Hello! I can aggregate all your incoming email messages and sent it to your Telegram. \nUse /add command to setup your email box. I use encryption and don\'t store your emails. So I\'m secure bot :)\nIf you have some questions or problems use /help command.',
     add_txt: 'Choose your email service:',
     list_txt: 'Here is your added emails:\n',
     help_txt: """
@@ -19,10 +19,6 @@ __en_texts = {
 /list - show all your added email addresses
 /help - show this message
 /start  - show bot description
-
-If you have problems with setting up your email make sure that:
-1) two factor authorization is disabled on you email account
-2) access by IMAP protocol is enabled
 
 Email for questions: a.musin@outlook.com
         """,

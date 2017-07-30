@@ -42,10 +42,16 @@ class Database:
                        (user_id, email_settings.type, email_settings.email, email_settings.auth_data))
         self.db.commit()
 
+    def update_auth_data(self, email_id, auth_data):
+        cursor = self.db.cursor()
+        cursor.execute('UPDATE user_emails SET auth_data=%s WHERE id=%s',
+                       (email_id, auth_data))
+        self.db.commit()
+
     def get_emails(self, user_id):
         cursor = self.db.cursor()
 
-        cursor.execute('SELECT email, type, auth_data from user_emails WHERE user_id=%s', [user_id])
+        cursor.execute('SELECT id, email, type, auth_data from user_emails WHERE user_id=%s', [user_id])
 
         rows = cursor.fetchall()
 
@@ -53,7 +59,7 @@ class Database:
         if rows and len(rows) > 0:
             for row in rows:
                 email = UserData.EmailSettings()
-                email.email, email.type, email.auth_data = row
+                email.id, email.email, email.type, email.auth_data = row
                 result.append(email)
 
         return result

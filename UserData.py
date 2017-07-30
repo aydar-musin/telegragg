@@ -11,6 +11,7 @@ class User:
 
 class EmailSettings:
     def __init__(self):
+        self.id = None
         self.email = None
         self.type = None
         self.auth_data = None

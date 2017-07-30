@@ -8,17 +8,25 @@ from apiclient import discovery
 from EmailMessage import EmailMessage
 import email_parser
 
+
 class GmailService:
     def __init__(self, credentials):
         self.credentials = OAuth2Credentials.from_json(credentials)
         self.name = 'gmail'
-        self.gmail = discovery.build('gmail', 'v1', http=self.credentials.authorize(httplib2.Http()))
+        self.gmail = discovery.build('gmail', 'v1', http=self.credentials.authorize(http=httplib2.Http()))
 
     @staticmethod
     def get_flow():
         return client.flow_from_clientsecrets(os.path.dirname(os.path.abspath(__file__))+'/secrets/google.json',
             scope='https://mail.google.com https://www.googleapis.com/auth/gmail.readonly',
             redirect_uri=config.callback_url)
+
+    def refresh_auth_data(self):
+        if self.credentials.access_token_expired:
+            self.credentials.refresh(http=httplib2.Http())
+            return True, self.credentials.to_json()
+
+        return False, self.credentials.to_json()
 
     def get_user_email(self):
         http = self.credentials.authorize(httplib2.Http())
