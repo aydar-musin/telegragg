@@ -95,11 +95,11 @@ class GmailService:
                 return email_parser.from_base64(payload['body']['data'].encode('UTF-8'))
             elif transfer_encoding == 'quoted-printable':
                 return email_parser.from_quoted_printable(email_parser.from_base64(payload['body']['data'].encode('UTF-8')))
-            elif transfer_encoding == '8bit':
-                return email_parser.from_quoted_printable(email_parser.from_base64(payload['body']['data'].econde('UTF-8')))
+            elif transfer_encoding == '8bit' or transfer_encoding == '7bit' :
+                return email_parser.from_quoted_printable(email_parser.from_base64(payload['body']['data'].encode('UTF-8')))
             elif not transfer_encoding:
                 return email_parser.clean_str(payload['body']['data'].encode('UTF-8'))
             else:
-                raise Exception('Not supported transfer encoding')
+                raise Exception('Not supported transfer encoding: '+transfer_encoding)
         else:
             return None
