@@ -3,11 +3,12 @@ from bs4 import BeautifulSoup
 import re
 import quopri
 
+
 def from_html(html, transfer_encoding):
     inputs = html
     if transfer_encoding == 'base64':
         inputs = base64.urlsafe_b64decode(inputs)
-    elif transfer_encoding == 'quoted-printable':
+    elif transfer_encoding == 'quoted-printable' or transfer_encoding == '8bit' or transfer_encoding == '7bit':
         inputs = quopri.decodestring(base64.urlsafe_b64decode(inputs))
 
     soup = BeautifulSoup(inputs)
